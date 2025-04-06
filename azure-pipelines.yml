@@ -1,14 +1,15 @@
 trigger:
-- master
+- main  # Change to 'master' if needed
 
 pool:
-  name: Default
+  name: Default  # Your self-hosted agent pool
 
 variables:
   buildConfiguration: 'Release'
-  NUGET_FEED_URL: 'https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json'
+  NUGET_FEED_URL: 'https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/'
 
 steps:
+# Install .NET SDK
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
@@ -16,15 +17,18 @@ steps:
     version: '8.0.x'
     includePreviewVersions: true
 
+# Install NuGet CLI
 - task: NuGetToolInstaller@1
   displayName: 'Install NuGet CLI'
 
+# Restore NuGet packages
 - task: DotNetCoreCLI@2
   displayName: 'Restore NuGet packages'
   inputs:
     command: 'restore'
     projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
 
+# Build the solution
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
@@ -32,6 +36,7 @@ steps:
     projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
+# Pack NuGet package
 - task: DotNetCoreCLI@2
   displayName: 'Pack NuGet package'
   inputs:
@@ -41,9 +46,10 @@ steps:
     outputDir: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: 'off'
 
+# Push to Azure Artifacts feed using the Credential Provider
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
-    dotnet nuget push "$(Build.ArtifactStagingDirectory)/StringExtensionsLibrary.1.0.0.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)"
   displayName: 'Push to Azure Artifacts feed'
   env:
-    NUGET_PAT: $(NUGET_PAT)
+    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"$(NUGET_FEED_URL)", "username":"anything", "password":"$(NUGET_PAT)"}]}'
