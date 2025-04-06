@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  name: Default  # Your self-hosted agent
+  name: Default
 
 steps:
 - task: UseDotNet@2
@@ -16,5 +16,7 @@ steps:
 - script: dotnet pack StringExtensionsLibrary/StringExtensionsLibrary.csproj -o $(Build.ArtifactStagingDirectory)
   displayName: 'Pack NuGet Package'
 
-- script: dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json" --api-key $(NUGET_PAT)
+- script: dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json"
   displayName: 'Push to Azure Artifacts Feed'
+  env:
+    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json", "username":"anyuser", "password":"$(NUGET_PAT)"}]}'
