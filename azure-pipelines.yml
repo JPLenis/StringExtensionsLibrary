@@ -1,8 +1,8 @@
 trigger:
-- main  
+- master  
 
 pool:
-  name: Default  
+  name: Default  # Your self-hosted agent pool name
 
 variables:
   buildConfiguration: 'Release'
@@ -46,10 +46,10 @@ steps:
     outputDir: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: 'off'
 
-# Push to Azure Artifacts feed
+# Push NuGet package to Azure Artifacts feed
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
-    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/StringExtensionsLibrary.1.0.0.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
   displayName: 'Push to Azure Artifacts feed'
   env:
-    NUGET_PAT: $(NUGET_PAT)
+    NUGET_PAT: $(NUGET_PAT)  # Ensure this secret variable is set in your pipeline settings
