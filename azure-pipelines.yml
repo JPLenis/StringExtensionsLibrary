@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  name: Default  # Use your self-hosted agent here
+  name: Default  # Your self-hosted agent
 
 variables:
   buildConfiguration: 'Release'
@@ -24,6 +24,7 @@ steps:
   inputs:
     command: 'restore'
     projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
+    restorePackages: true  # Ensure restore is performed using the nuget.config
 
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
