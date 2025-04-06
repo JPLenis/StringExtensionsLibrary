@@ -1,5 +1,5 @@
 trigger:
-- main  # Make sure this matches the branch name in your repo
+- main  # Change to 'master' if needed
 
 pool:
   name: Default  # Your self-hosted agent pool name
@@ -46,10 +46,10 @@ steps:
     outputDir: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: 'off'
 
-# Push to Azure Artifacts feed (using dotnet with Azure Artifacts Credential Provider)
+# Push to Azure Artifacts feed
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
     dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
   displayName: 'Push to Azure Artifacts feed'
   env:
-    NUGET_PAT: $(NUGET_PAT)  # Make sure you have the NUGET_PAT variable set in the pipeline variables or as a secret.
+    NUGET_PAT: $(NUGET_PAT)
