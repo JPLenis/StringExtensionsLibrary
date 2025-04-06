@@ -2,7 +2,10 @@ trigger:
 - master
 
 pool:
-  name: Default  
+  name: Default  # Make sure your self-hosted agent is in this pool
+
+variables:
+  NUGET_FEED_URL: "https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json"
 
 steps:
 - task: UseDotNet@2
@@ -13,14 +16,8 @@ steps:
 - script: dotnet build StringExtensionsLibrary/StringExtensionsLibrary.csproj
   displayName: 'Build Project'
 
-- script: dotnet pack StringExtensionsLibrary/StringExtensionsLibrary.csproj -o $(Build.ArtifactStagingDirectory)
+- script: dotnet pack StringExtensionsLibrary/StringExtensionsLibrary.csproj -c Release -o $(Build.ArtifactStagingDirectory)
   displayName: 'Pack NuGet Package'
 
-- script: |
-    echo "Pushing package to Azure Artifacts..."
-    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" ^
-      --source "https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json" ^
-      --api-key %NUGET_PAT%
+- script: echo "Pushing package to Azure Artifacts..." && dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key "$(NUGET_PAT)"
   displayName: 'Push to Azure Artifacts Feed'
-  env:
-    NUGET_PAT: $(NUGET_PAT)
