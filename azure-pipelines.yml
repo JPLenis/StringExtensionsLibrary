@@ -1,17 +1,17 @@
-# azure-pipelines.yml
-
 trigger:
-- main  # Change to your default branch if needed
+- master
 
 pool:
-  name: Default  # Self-hosted agent pool name
+  name: Default  # your self-hosted agent
 
 variables:
   buildConfiguration: 'Release'
-  NUGET_FEED_URL: 'https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json'
+  nugetPackageName: 'StringExtensionsLibrary.1.0.0.nupkg'
+  outputDir: '$(Build.ArtifactStagingDirectory)'
 
 steps:
 
+# Install .NET SDK 8
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
@@ -19,21 +19,18 @@ steps:
     version: '8.0.x'
     includePreviewVersions: true
 
+# Install NuGet CLI
 - task: NuGetToolInstaller@1
   displayName: 'Install NuGet CLI'
 
-# Optional: Debugging step to verify .nupkg generation path
-- script: |
-    echo "Before pack - contents of staging dir:"
-    dir $(Build.ArtifactStagingDirectory)
-  displayName: 'Debug: Show staging dir before pack'
-
+# Restore NuGet packages
 - task: DotNetCoreCLI@2
   displayName: 'Restore NuGet packages'
   inputs:
     command: 'restore'
     projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
 
+# Build the solution
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
@@ -41,25 +38,28 @@ steps:
     projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
+# Pack NuGet package
 - task: DotNetCoreCLI@2
   displayName: 'Pack NuGet package'
   inputs:
     command: 'pack'
     packagesToPack: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
     configuration: 'Release'
-    outputDir: '$(Build.ArtifactStagingDirectory)'
-    versioningScheme: 'off'
+    outputDir: '$(outputDir)'
 
-# Optional: Confirm package is generated
-- script: |
-    echo "After pack - contents of staging dir:"
-    dir $(Build.ArtifactStagingDirectory)
-  displayName: 'Debug: Show staging dir after pack'
-
+# Push to Azure Artifacts feed
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
-    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source $(NUGET_FEED_URL) --api-key az
+    dotnet nuget push "$(outputDir)/$(nugetPackageName)" --source "string-extension-feed" --api-key azdo
   displayName: 'Push to Azure Artifacts feed'
   env:
-    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"$(NUGET_FEED_URL)","username":"AzureDevOps","password":"$(NUGET_PAT)"}]}'
-    NUGET_PAT: $(NUGET_PAT)
+    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: |
+      {
+        "endpointCredentials": [
+          {
+            "endpoint": "https://pkgs.dev.azure.com/jlenis/_packaging/string-extension-feed/nuget/v3/index.json",
+            "username": "azdo",
+            "password": "$(NUGET_PAT)"
+          }
+        ]
+      }
