@@ -1,23 +1,41 @@
 trigger:
-- master
+- master  
 
 pool:
-  name: Default  # Make sure your self-hosted agent is in this pool
+  name: Default  
 
 variables:
-  NUGET_FEED_URL: "https://pkgs.dev.azure.com/jlenis/StringExtensionsCI/_packaging/string-extension-feed/nuget/v3/index.json"
+  buildConfiguration: 'Release'
 
 steps:
 - task: UseDotNet@2
   inputs:
+    packageType: 'sdk'
     version: '8.0.x'
     includePreviewVersions: true
 
-- script: dotnet build StringExtensionsLibrary/StringExtensionsLibrary.csproj
-  displayName: 'Build Project'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
 
-- script: dotnet pack StringExtensionsLibrary/StringExtensionsLibrary.csproj -c Release -o $(Build.ArtifactStagingDirectory)
-  displayName: 'Pack NuGet Package'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
+    arguments: '--configuration $(buildConfiguration)'
 
-- script: echo "Pushing package to Azure Artifacts..." && dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key "$(NUGET_PAT)"
-  displayName: 'Push to Azure Artifacts Feed'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'StringExtensionsLibrary/StringExtensionsLibrary.csproj'
+    configuration: 'Release'
+    versioningScheme: 'off'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    publishVstsFeed: 'string-extension-feed'  
+    nuGetFeedType: 'internal'
