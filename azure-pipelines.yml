@@ -1,8 +1,8 @@
 trigger:
-- master  # or "main" if your default branch is named that
+- master  # change to 'main' if that's your branch name
 
 pool:
-  name: Default  # or replace with your self-hosted agent pool name
+  vmImage: 'windows-latest'  # Use Microsoft-hosted agent
 
 steps:
 - task: UseDotNet@2
