@@ -1,8 +1,8 @@
 trigger:
-- main  # Change to 'master' if needed
+- main  
 
 pool:
-  name: Default  # Your self-hosted agent pool name
+  name: Default  
 
 variables:
   buildConfiguration: 'Release'
