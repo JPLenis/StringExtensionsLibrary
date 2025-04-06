@@ -43,7 +43,5 @@ steps:
 
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
-    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)" --api-key "91lvkAPBKc9aX1Id26j5em2AqZeQm5VnlxUaRaRI3A29Uxw8q0mCJQQJ99BDACAAAAAnPw96AAASAZDO4USx"
   displayName: 'Push to Azure Artifacts feed'
-  env:
-    NUGET_PAT: $(NUGET_PAT)  # Ensure this variable is defined in your pipeline settings as a secret variable
