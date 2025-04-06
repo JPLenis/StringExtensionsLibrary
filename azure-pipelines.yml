@@ -2,7 +2,7 @@ trigger:
 - main  # Change to 'master' if needed
 
 pool:
-  name: Default  # Your self-hosted agent pool
+  name: Default  # Your self-hosted agent pool name
 
 variables:
   buildConfiguration: 'Release'
@@ -46,10 +46,16 @@ steps:
     outputDir: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: 'off'
 
-# Push to Azure Artifacts feed using the Credential Provider
+# Debug: List the files in the artifact staging directory
+- script: |
+    echo "Listing files in the artifact directory:"
+    dir "$(Build.ArtifactStagingDirectory)"
+  displayName: 'List Artifact Files'
+
+# Push to Azure Artifacts feed using the full filename
 - script: |
     echo "Pushing NuGet package to Azure Artifacts..."
-    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --source "$(NUGET_FEED_URL)"
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/StringExtensionsLibrary.1.0.0.nupkg" --source "$(NUGET_FEED_URL)" --api-key $(NUGET_PAT)
   displayName: 'Push to Azure Artifacts feed'
   env:
-    VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials":[{"endpoint":"$(NUGET_FEED_URL)", "username":"anything", "password":"$(NUGET_PAT)"}]}'
+    NUGET_PAT: $(NUGET_PAT)
