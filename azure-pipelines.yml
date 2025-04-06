@@ -1,5 +1,5 @@
 trigger:
-- main  # Change to 'master' if needed
+- master  
 
 pool:
   name: Default  # Your self-hosted agent pool name
