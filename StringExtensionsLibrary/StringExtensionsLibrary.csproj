@@ -1,9 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Package generation settings -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>StringExtensionsLibrary</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Juan Lenis</Authors>
+    <Description>A NuGet package containing an extension method for strings.</Description>
   </PropertyGroup>
 
 </Project>
