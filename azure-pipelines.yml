@@ -1,8 +1,8 @@
 trigger:
-- master  # change to 'main' if that's your branch name
+- master 
 
 pool:
-  vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+  vmImage: 'windows-latest'  
 
 steps:
 - task: UseDotNet@2
